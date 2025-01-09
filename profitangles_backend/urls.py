@@ -18,9 +18,10 @@ from django.contrib import admin
 from django.urls import path
 from .views import hello
 from stocks.views import StockDataView
-
+from scraper.views import scrape_view
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('hello/', hello, name='hello'),
     path('api/stocks/<str:symbol>/', StockDataView.as_view(), name='stock-data'),
+    path('api/scrape/', scrape_view, name='scrape'),
 ]
