@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload File</title>
+</head>
+
+<body>
+    <h1>Upload CSV File</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="csv_file" />
+        <button type="submit">Upload</button>
+    </form>
+
+    {% if csv_file_uploaded %}
+    <h2>File Uploaded Successfully!</h2>
+    <p>Choose an analysis:</p>
+    <ul>
+        <li><a href="{% url 'stock_open_price' %}">Generate Stock Open Price Graph</a></li>
+        <li><a href="{% url 'rsi_graph' %}">Generate RSI Graph</a></li>
+        <li><a href="{% url 'max_percentage_movement' %}">Generate Max Percentage Movement</a></li>
+    </ul>
+    {% endif %}
+</body>
+
+</html>

@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from .views import hello
 from stocks.views import StockDataView
 from scraper.views import scrape_view
@@ -23,5 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('hello/', hello, name='hello'),
     path('api/stocks/<str:symbol>/', StockDataView.as_view(), name='stock-data'),
+    path('visualize/', include('visualize.urls')),
     path('api/scrape/', scrape_view, name='scrape'),
 ]
