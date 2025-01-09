@@ -79,12 +79,22 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Media settings
+MEDIA_URL = '/media/'
+
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = '/static/'
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = '/static/'  # URL to access static files
+
+# Directory where `collectstatic` will store all static files (for production)
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Additional directories to find static files during development
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',  # This should point to the static directory in your project
+]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
