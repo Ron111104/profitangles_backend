@@ -15,12 +15,31 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from .views import hello
 from stocks.views import StockDataView
+from .visualize.views.upload import upload_file
+from .views.stock_open_price import stock_open_price
+from .views.rsi_graph import rsi_graph
+from .views.max_percentage import max_percentage_movement
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('hello/', hello, name='hello'),
     path('api/stocks/<str:symbol>/', StockDataView.as_view(), name='stock-data'),
+    # path('visualize/', include('visualize.urls')),
+    path('upload/', upload_file, name='upload_file'),
+    path('stock_open_price/', stock_open_price, name='stock_open_price'),
+    path('rsi_graph/', rsi_graph, name='rsi_graph'),
+    path('max_percentage_movement/', max_percentage_movement, name='max_percentage_movement'),
+]
+
+from django.urls import path
+
+
+urlpatterns = [
+    path('upload/', upload_file, name='upload_file'),
+    path('stock_open_price/', stock_open_price, name='stock_open_price'),
+    path('rsi_graph/', rsi_graph, name='rsi_graph'),
+    path('max_percentage_movement/', max_percentage_movement, name='max_percentage_movement'),
 ]
