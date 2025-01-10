@@ -19,6 +19,9 @@ from django.urls import path, include
 from .views import hello
 from stocks.views import StockDataView
 from scraper.views import scrape_view
+from django.conf import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('hello/', hello, name='hello'),
@@ -26,3 +29,6 @@ urlpatterns = [
     path('visualize/', include('visualize.urls')),
     path('api/scrape/', scrape_view, name='scrape'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
