@@ -4,7 +4,6 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'your-default-secret-key')
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['.vercel.app', 'localhost', '127.0.0.1']
 
@@ -18,6 +17,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'stocks',
+    'scraper',
     'visualize',
 ]
 
@@ -80,7 +80,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Media settings
-MEDIA_URL = '/media/'
+MEDIA_URL = '/media/'  # URL to access media files
+MEDIA_ROOT = BASE_DIR / 'media'
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
@@ -98,3 +99,5 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',  # This should point to the static directory in your project
 ]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'

@@ -16,6 +16,10 @@ def upload_file(request):
             os.makedirs(fs.location, exist_ok=True)  # Ensure directory exists
             filename = fs.save(csv_file.name, csv_file)
 
+            # Store the full file path in session (not the URL)
+            file_path = os.path.join(fs.location, filename)  # Full file path
+            request.session['csv_file_path'] = file_path  # Store the full file path
+
             # Pass context to display buttons
             return render(request, "visualize/upload.html", {"csv_file_uploaded": True})
         

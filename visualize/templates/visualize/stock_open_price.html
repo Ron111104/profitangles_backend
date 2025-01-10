@@ -1,25 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stock Open Price Graph</title>
-    {% load static %}
 </head>
-
 <body>
     <h1>Stock Open Price Graph</h1>
 
     {% if image_path %}
-    <img src="{% static image_path %}" alt="Stock Open Price Graph">
+        <!-- Ensure the image source path is correctly formed -->
+        <img src="{{ MEDIA_URL }}{{ image_path }}" alt="Stock Open Price Graph">
+        <p>Media Image Path: {{ MEDIA_URL }}{{ image_path }}</p>
+        <p>{{ image_path }}</p>
     {% else %}
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="file" name="csv_file" />
-        <button type="submit">Generate Stock Open Price Graph</button>
-    </form>
+        <p>Please upload a CSV file first.</p>
     {% endif %}
 </body>
-
 </html>
