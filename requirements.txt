@@ -16,7 +16,9 @@ idna==3.7
 kiwisolver==1.4.8
 lxml==5.2.2
 matplotlib==3.10.0
+mplfinance==0.12.10b0
 multitasking==0.0.11
+mysqlclient==2.2.7
 numpy==2.0.1
 packaging==24.2
 pandas==2.2.2
@@ -25,6 +27,7 @@ pillow==11.1.0
 platformdirs==4.2.2
 pyparsing==3.2.1
 python-dateutil==2.9.0.post0
+python-decouple==3.8
 pytz==2024.1
 requests==2.32.3
 seaborn==0.13.2
