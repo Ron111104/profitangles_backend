@@ -10,14 +10,21 @@ import base64
 from matplotlib.dates import DateFormatter, AutoDateLocator
 from datetime import timedelta
 import numpy as np
+<<<<<<< Updated upstream
 from visualize.models import StockAnalysis
+=======
+>>>>>>> Stashed changes
 
 matplotlib.use('Agg')  # Use non-GUI backend
 
 def stock_open_price(request):
     try:
         # File path handling
+<<<<<<< Updated upstream
         file_path = os.path.join(settings.MEDIA_ROOT, "uploads", "AAPL.csv")
+=======
+        file_path = os.path.join(settings.MEDIA_ROOT, "uploads", "AAME.csv")
+>>>>>>> Stashed changes
         if not os.path.exists(file_path):
             return JsonResponse({"error": f"File not found: {file_path}"}, status=404)
 
@@ -148,7 +155,11 @@ def stock_open_price(request):
         buffer.close()
         plt.close()
         
+<<<<<<< Updated upstream
         response_data = {
+=======
+        return JsonResponse({
+>>>>>>> Stashed changes
             'status': 'success',
             'message': 'Enhanced stock analysis graph generated successfully',
             'image': image_base64,
@@ -158,6 +169,7 @@ def stock_open_price(request):
                 'end_price': float(end_price),
                 'price_change_percent': float(price_change)
             }
+<<<<<<< Updated upstream
         }
 
         # Save the data to MySQL
@@ -175,3 +187,12 @@ def stock_open_price(request):
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'error': str(e)}, status=500)
+=======
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'error': str(e)
+        }, status=500)
+>>>>>>> Stashed changes
