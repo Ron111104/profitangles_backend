@@ -2,46 +2,70 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from django.http import HttpResponse
-from django.shortcuts import render
-from django.conf import settings
+from io import BytesIO
+import base64
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from matplotlib.dates import DateFormatter, AutoDateLocator
 
-import matplotlib
-matplotlib.use('Agg')  # Use non-GUI backend
-
+@csrf_exempt
 def max_percentage_movement(request):
-    image_path = None  # Initialize image_path
-    if request.method == 'POST' and 'csv_file' in request.FILES:
-        try:
-            csv_file = request.FILES['csv_file']
-            df = pd.read_csv(csv_file)
+    try:
+        if request.method != 'POST':
+            return JsonResponse({'status': 'error', 'error': 'only post requests are allowed'}, status=405)
 
-            # Check required columns
-            if not {'Date', 'High', 'Low'}.issubset(df.columns):
-                return HttpResponse(
-                    "Error: CSV must contain 'Date', 'High', and 'Low' columns.",
-                    status=400
-                )
+        # parse the incoming json data
+        body = json.loads(request.body)
+        data = body.get('data')
 
-            # Calculate percentage change and rolling max change
-            df['Percentage Change'] = (df['High'] - df['Low']) / df['Low'] * 100
-            df['7 Day Max Change'] = df['Percentage Change'].rolling(window=7).max()
+        if not data:
+            return JsonResponse({'status': 'error', 'error': 'no data provided'}, status=400)
 
-            # Plot the graph
-            plt.figure(figsize=(12, 6))
-            sns.lineplot(data=df, x='Date', y='7 Day Max Change')
-            plt.title('Max Percentage Movement in 7 Days')
-            plt.xticks(rotation=45)
-            plt.grid(True)
-            plt.tight_layout()
+        # convert data to dataframe
+        df = pd.DataFrame(data)
 
-            # Save the plot to the static directory
-            image_path = 'images/max_percentage_movement.png'
-            full_image_path = os.path.join(settings.STATICFILES_DIRS[0], image_path)
-            os.makedirs(os.path.dirname(full_image_path), exist_ok=True)
-            plt.savefig(full_image_path)
-            plt.close()
-        except Exception as e:
-            return HttpResponse(f"Error processing the file: {str(e)}", status=500)
+        # ensure date column is in datetime format
+        df['date'] = pd.to_datetime(df['date'], errors='coerce')
 
-    return render(request, 'visualize/max_percentage_movement.html', {'image_path': image_path})
+        # drop rows with nat in the 'date' column
+        df = df.dropna(subset=['date'])
+
+        # calculate percentage change and rolling max change
+        df['percentage change'] = (df['high'] - df['low']) / df['low'] * 100
+        df['7 day max change'] = df['percentage change'].rolling(window=7).max()
+
+        # plot the graph
+        plt.style.use('seaborn-v0_8-whitegrid')
+        sns.set_palette("deep")
+        fig, ax = plt.subplots(figsize=(12, 6))
+        ax.plot(df['date'], df['7 day max change'], label='7 day max change', color='#2962ff', linewidth=2)
+
+        # titles and labels
+        ax.set_title('max percentage movement in 7 days', fontsize=16, pad=20, fontweight='bold', color='#1a237e')
+        ax.set_xlabel('date', fontsize=12, labelpad=10, color='#424242')
+        ax.set_ylabel('max percentage change (%)', fontsize=12, labelpad=10, color='#424242')
+
+        # date formatting on x-axis
+        date_locator = AutoDateLocator()
+        ax.xaxis.set_major_locator(date_locator)
+        ax.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d'))
+        plt.xticks(rotation=45)
+
+        # add grid and legend
+        ax.grid(True, linestyle='--', alpha=0.5)
+        ax.legend(loc='upper left', fontsize=10)
+
+        # save the plot as a base64 string
+        buffer = BytesIO()
+        plt.savefig(buffer, format='png', dpi=300, bbox_inches='tight')
+        buffer.seek(0)
+        image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        buffer.close()
+        plt.close()
+
+        # return the base64 image as json response
+        return JsonResponse({'image': image_base64})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'error': str(e)}, status=500)
