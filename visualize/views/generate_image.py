@@ -165,6 +165,59 @@ def generate_image(request):
                     cursor_test.close()
                     test_connection.close()
 
+        if 'rsi' in df.columns  and 'date' in df.columns:
+            df['date'] = pd.to_datetime(df['date'], errors='coerce')  # Ensure date format
+            df = df.dropna(subset=['date'])  # Drop invalid dates
+            df['date'] = df['date'].dt.strftime('%Y-%m-%d')
+            rsi_data = df[['date', 'rsi']].copy()
+            rsi_data['rsi'] = rsi_data['rsi'].fillna(0)
+            # Convert data to JSON-compatible format and send to max_percentage_movement endpoint
+            payload = {'data': rsi_data.to_dict(orient='records')}
+            response = requests.post(
+                f"{BASE_URL}/visualize/rsi_graph/",
+                json=payload,
+                headers={'Content-Type': 'application/json'},
+                timeout=30
+            )
+
+            if response.status_code == 200:
+                response_data = response.json()
+                if 'image' in response_data:
+                    # Save the image to the database
+                    image_base64 = response_data['image']
+                    test_connection = get_test_db_connection()
+                    cursor_test = test_connection.cursor()
+                    cursor_test.execute("INSERT INTO stock_visualization (image) VALUES (%s)", (image_base64,))
+                    visualization_ids.append(cursor_test.lastrowid)
+                    test_connection.commit()
+                    cursor_test.close()
+                    test_connection.close()
+        # if 'open' in df.columns  and 'low' in df.columns  and 'high' in df.columns  and 'close' in df.columns  and 'date' in df.columns:
+        #     df['date'] = pd.to_datetime(df['date'], errors='coerce')  # Ensure date format
+        #     df = df.dropna(subset=['date'])  # Drop invalid dates
+        #     df['date'] = df['date'].dt.strftime('%Y-%m-%d')
+        #     ohlc_data = df[['date', 'open','high','low','close']].copy()
+        #     # Convert data to JSON-compatible format and send to max_percentage_movement endpoint
+        #     payload = {'data': ohlc_data.to_dict(orient='records')}
+        #     response = requests.post(
+        #         f"{BASE_URL}/visualize/ohlc/",
+        #         json=payload,
+        #         headers={'Content-Type': 'application/json'},
+        #         timeout=30
+        #     )
+
+        #     if response.status_code == 200:
+        #         response_data = response.json()
+        #         if 'image' in response_data:
+        #             # Save the image to the database
+        #             image_base64 = response_data['image']
+        #             test_connection = get_test_db_connection()
+        #             cursor_test = test_connection.cursor()
+        #             cursor_test.execute("INSERT INTO stock_visualization (image) VALUES (%s)", (image_base64,))
+        #             visualization_ids.append(cursor_test.lastrowid)
+        #             test_connection.commit()
+        #             cursor_test.close()
+        #             test_connection.close()
         # Clean up the trial database connection
         cursor.close()
         trial_connection.close()

@@ -8,6 +8,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from matplotlib.dates import DateFormatter, AutoDateLocator
+import matplotlib
+matplotlib.use('Agg') 
 
 @csrf_exempt
 def max_percentage_movement(request):
