@@ -37,7 +37,9 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "https://*.vercel.app",
+    "https://profitangles-backend.onrender.com",  # Add this line
 ]
+
 
 ROOT_URLCONF = 'profitangles_backend.urls'
 

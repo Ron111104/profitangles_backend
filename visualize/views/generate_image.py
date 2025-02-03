@@ -221,6 +221,9 @@ def generate_image(request):
         # Clean up the trial database connection
         cursor.close()
         trial_connection.close()
+        logger.debug(f"Query: {query}")
+        logger.debug(f"Request body: {request.body}")
+        logger.debug(f"Response from visualization API: {response.status_code}, {response.text}")
 
         # Return the list of visualization IDs
         if visualization_ids:
