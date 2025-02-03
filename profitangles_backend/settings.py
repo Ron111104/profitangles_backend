@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'your-default-secret-key')
 
-ALLOWED_HOSTS = ['.vercel.app', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['.vercel.app', 'localhost', '127.0.0.1','.onrender.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -36,6 +36,7 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "https://*.vercel.app",
 ]
 
 ROOT_URLCONF = 'profitangles_backend.urls'
