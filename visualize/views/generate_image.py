@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from dotenv import load_dotenv
 import logging
+import traceback
 
 # Load environment variables from .env file
 load_dotenv()
@@ -92,6 +93,9 @@ def generate_image(request):
         if not query:
             return JsonResponse({'status': 'error', 'error': 'No query provided'}, status=400)
 
+        # Log the query to debug
+        logger.info(f"Executing query: {query}")
+
         # Get trial database connection to fetch data
         trial_connection = get_trial_db_connection()
 
@@ -123,6 +127,9 @@ def generate_image(request):
                 timeout=30
             )
 
+            logger.info(f"API Response Status: {response.status_code}")
+            logger.info(f"API Response Body: {response.text}")
+
             if response.status_code == 200:
                 response_data = response.json()
                 if 'image' in response_data:
@@ -152,6 +159,9 @@ def generate_image(request):
                 timeout=30
             )
 
+            logger.info(f"API Response Status: {response.status_code}")
+            logger.info(f"API Response Body: {response.text}")
+
             if response.status_code == 200:
                 response_data = response.json()
                 if 'image' in response_data:
@@ -165,6 +175,7 @@ def generate_image(request):
                     cursor_test.close()
                     test_connection.close()
 
+        # Check and process data for RSI
         if 'rsi' in df.columns  and 'date' in df.columns:
             df['date'] = pd.to_datetime(df['date'], errors='coerce')  # Ensure date format
             df = df.dropna(subset=['date'])  # Drop invalid dates
@@ -180,6 +191,9 @@ def generate_image(request):
                 timeout=30
             )
 
+            logger.info(f"API Response Status: {response.status_code}")
+            logger.info(f"API Response Body: {response.text}")
+
             if response.status_code == 200:
                 response_data = response.json()
                 if 'image' in response_data:
@@ -192,38 +206,12 @@ def generate_image(request):
                     test_connection.commit()
                     cursor_test.close()
                     test_connection.close()
-        # if 'open' in df.columns  and 'low' in df.columns  and 'high' in df.columns  and 'close' in df.columns  and 'date' in df.columns:
-        #     df['date'] = pd.to_datetime(df['date'], errors='coerce')  # Ensure date format
-        #     df = df.dropna(subset=['date'])  # Drop invalid dates
-        #     df['date'] = df['date'].dt.strftime('%Y-%m-%d')
-        #     ohlc_data = df[['date', 'open','high','low','close']].copy()
-        #     # Convert data to JSON-compatible format and send to max_percentage_movement endpoint
-        #     payload = {'data': ohlc_data.to_dict(orient='records')}
-        #     response = requests.post(
-        #         f"{BASE_URL}/visualize/ohlc/",
-        #         json=payload,
-        #         headers={'Content-Type': 'application/json'},
-        #         timeout=30
-        #     )
 
-        #     if response.status_code == 200:
-        #         response_data = response.json()
-        #         if 'image' in response_data:
-        #             # Save the image to the database
-        #             image_base64 = response_data['image']
-        #             test_connection = get_test_db_connection()
-        #             cursor_test = test_connection.cursor()
-        #             cursor_test.execute("INSERT INTO stock_visualization (image) VALUES (%s)", (image_base64,))
-        #             visualization_ids.append(cursor_test.lastrowid)
-        #             test_connection.commit()
-        #             cursor_test.close()
-        #             test_connection.close()
         # Clean up the trial database connection
         cursor.close()
         trial_connection.close()
         logger.debug(f"Query: {query}")
         logger.debug(f"Request body: {request.body}")
-        logger.debug(f"Response from visualization API: {response.status_code}, {response.text}")
 
         # Return the list of visualization IDs
         if visualization_ids:
@@ -232,6 +220,10 @@ def generate_image(request):
             return JsonResponse({'status': 'error', 'error': 'No relevant columns found to generate visualizations'}, status=400)
 
     except Exception as e:
+        # Log the exception stack trace
+        logger.error(f"Error occurred: {str(e)}")
+        logger.error(f"Stack Trace: {traceback.format_exc()}")
+
         # Clean up connections if they exist
         if 'cursor' in locals():
             cursor.close()
@@ -239,4 +231,5 @@ def generate_image(request):
             trial_connection.close()
         if 'test_connection' in locals():
             test_connection.close()
+
         return JsonResponse({'status': 'error', 'error': str(e)}, status=500)
